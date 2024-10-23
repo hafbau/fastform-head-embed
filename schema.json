@@ -22,6 +22,12 @@
       },
       {
         "type": "text",
+        "key": "elementsOptions",
+        "label": "JSON of Stripe Elements Options",
+        "defaultValue": "{}"
+      },
+      {
+        "type": "text",
         "key": "elementOptions",
         "label": "JSON of Stripe Element Options",
         "defaultValue": "{}"

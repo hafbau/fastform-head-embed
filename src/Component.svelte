@@ -12,6 +12,7 @@
 
   export let rules
   export let elementOptions
+  export let elementsOptions
   export let variables
 
   const { styleable, Provider } = getContext("sdk")
@@ -34,6 +35,7 @@
 
   $: rules = tryParse(rules)
   $: elementOptions = tryParse(elementOptions)
+  $: elementsOptions = tryParse(elementsOptions)
   $: variables = tryParse(variables)
   
 
@@ -80,6 +82,8 @@
   <Provider {actions} data={dataContext}>
     <Elements
       mode="setup"
+      currency="usd"
+      {...elementsOptions}
       {stripe}
       {theme}
       {labels}
