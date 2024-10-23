@@ -2,58 +2,93 @@
   "type": "component",
   "metadata": {},
   "schema": {
-    "name": "bb-fontawesome",
-    "friendlyName": "FontAwesome",
-    "description": "A FontAwesome component for Budibase",
-    "icon": "Text",
+    "name": "bb-stripe-elements",
+    "friendlyName": "Stripe Elements",
+    "description": "A Stripe Elements component for Fastform",
+    "icon": "CreditCard",
     "settings": [
       {
-        "type": "select",
-        "key": "iconStyle",
-        "label": "Icon Style",
-        "options": ["Solid", "Regular", "Brands"],
-        "defaultValue": "Regular"
+        "type": "text",
+        "key": "PUBLIC_STRIPE_KEY",
+        "label": "Public Stripe Key",
+        "required": true
+      },
+      {
+        "type":"select",
+        "key":"elementType",
+        "label":"Element Type",
+        "options": ["payment", "address", "card"],
+        "defaultValue": "payment"
       },
       {
         "type": "text",
-        "key": "iconName",
-        "label": "Icon Name",
-        "defaultValue": "thumbs-up"
+        "key": "elementOptions",
+        "label": "JSON of Stripe Element Options",
+        "defaultValue": "{}"
       },
       {
-        "type": "number",
-        "key": "iconScale",
-        "label": "Scale",
-        "defaultValue": 1,
-        "min": 1,
-        "max": 50
-      },
+        "type": "section",
+        "section": true,
+        "label": "Appearance",
+        "settings": [
+          {
+            "type": "select",
+            "key": "theme",
+            "label": "Elements Theme",
+            "options": ["stripe", "night", "flat"],
+            "defaultValue": "stripe"
+          },
+          {
+            "type": "select",
+            "key": "labels",
+            "label": "Elements Labels Configuration",
+            "options": ["above", "floating"],
+            "defaultValue": "above"
+          },
+          {
+            "type": "boolean",
+            "key": "disableAnimations",
+            "label": "Disable Animations",
+            "defaultValue": false
+          },
+          {
+            "type": "text",
+            "key": "variables",
+            "label": "JSON of Stripe Appearance Variables",
+            "defaultValue": "{}"
+          },
+          {
+            "type": "text",
+            "key": "rules",
+            "label": "JSON of Stripe Appearance Rules",
+            "defaultValue": "{}"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      "TokenizeElements"
+    ],
+    "context": [
       {
-        "type": "number",
-        "key": "iconSubScale",
-        "label": "Sub Scale",
-        "defaultValue": 0,
-        "min": 0,
-        "max": 99
-      },
-      {
-        "type": "color",
-        "key": "iconColour",
-        "label": "Colour"
-      },
-      {
-        "type": "select",
-        "key": "iconAnimate",
-        "label": "Icon Animation",
-        "options": ["None", "Spin", "Pulse"],
-        "defaultValue": "None"
-      },
-      {
-        "type": "select",
-        "key": "iconFlip",
-        "label": "Icon Flip",
-        "options": ["None", "Horizontal", "Vertical"],
-        "defaultValue": "None"
+        "type": "static",
+        "values": [
+          {
+            "label": "Stripe Token",
+            "key": "__token",
+            "type": "string"
+          },
+          {
+            "label": "Stripe",
+            "key": "__stripe",
+            "type": "object"
+          },
+          {
+            "label": "Elements",
+            "key": "__elements",
+            "type": "object"
+          }
+        ]
       }
     ]
   }

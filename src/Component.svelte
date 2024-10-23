@@ -1,69 +1,100 @@
 <script>
-  import { getContext } from "svelte"
+  import { getContext, setContext } from "svelte"
+  import { onMount } from 'svelte'
+  import { loadStripe } from '@stripe/stripe-js'
+  import { Elements, PaymentElement, Address, Card } from 'svelte-stripe'
 
-  import Icon from 'svelte-awesome';
 
-  // UNCOMMENT FOR FONT AWESOME FREE
-  import * as far from '@fortawesome/free-regular-svg-icons';
-  import * as fas from '@fortawesome/free-solid-svg-icons';
-  import * as fab from '@fortawesome/free-brands-svg-icons';
+  export let PUBLIC_STRIPE_KEY
+  export let elementType
+  export let theme
+  export let labels
 
-  // UNCOMMENT FOR FONT AWESOME PRO
-  // import * as far from '@fortawesome/pro-regular-svg-icons';
-  // import * as fas from '@fortawesome/pro-solid-svg-icons';
-  // import * as fal from '@fortawesome/pro-light-svg-icons';
-  // import * as fat from '@fortawesome/pro-thin-svg-icons';
-  // import * as fab from '@fortawesome/free-brands-svg-icons';
+  export let rules
+  export let elementOptions
+  export let variables
 
-  const { styleable } = getContext("sdk")
+  const { styleable, Provider } = getContext("sdk")
   const component = getContext("component")
+  let stripe = null
+  let elements
 
-  export let iconStyle;
-  export let iconName;
-  export let iconScale;
-  export let iconSubScale;
-  export let iconColour;
-  export let iconFlip;
-  export let iconAnimate;
+  onMount(async () => {
+    stripe = await loadStripe(PUBLIC_STRIPE_KEY)
+  })
 
-  let faStyle;
-
-  $: switch (iconStyle) {
-    case "Solid":
-      faStyle = fas;
-      break;
-    case "Regular":
-      faStyle = far;
-      break;
-    case "Brands":
-      faStyle = fab;
-      break;
-    // UNCOMMENT FOR FONT AWESOME PRO
-    // case "Light":
-    //   faStyle = fal;
-    //   break;
-    // case "Thin":
-    //   faStyle = fat;
-    //   break;
-    default:
-      faStyle = far;
+  function tryParse(value) {
+    try {
+      return JSON.parse(value)
+    } catch (e) {
+      console.error(e)
+      return {}
+    }
   }
 
-  $: faName = "fa" + iconName.split("-").map((word) => {
-    return word[0].toUpperCase() + word.substring(1);
-  }).join("");
+  $: rules = tryParse(rules)
+  $: elementOptions = tryParse(elementOptions)
+  $: variables = tryParse(variables)
+  
 
-  $: fScale = iconScale + (iconSubScale / 100);
+  setContext("stripe-elements", {
+    __stripe,
+    __elements,
+    __token: "",
+    processing: false,
+    tokenizeAttempt: 0
+  });
+
+  function tokenize() {
+    const ctx = getContext("stripe-elements");
+    console.log('TokenizeElements', ctx);
+    if (ctx?.tokenizeAttempt > 3) {
+      console.log('TokenizeElements failed after 3 attempts');
+      setContext("stripe-elements", { ...ctx, processing: false, tokenizeAttempt: 0 });
+      return;
+    }
+    if (ctx?.__token) return ctx.__token;
+    if (ctx?.processing) return;
+    setContext("stripe-elements", { ...ctx, processing: true, tokenizeAttempt: ctx.tokenizeAttempt + 1 });
+    return stripe.createToken(elements).then((result) => {
+      if (result.error) {
+        console.log('Error', result.error)
+        setContext("stripe-elements", { ...ctx, processing: false, tokenizeAttempt: 0 });
+      } else {
+        console.log('Success', result.token)
+        setContext("stripe-elements", { ...ctx, processing: false, __token: result.token, tokenizeAttempt: 0 });
+        return result.token;
+      }
+    });
+  }
+  const actions = [
+    {
+      type: 'TokenizeElements',
+      callback: tokenize,
+    }
+  ]
+  $: dataContext =  getContext("stripe-elements");
 </script>
 
 <div use:styleable={$component.styles}>
-  {#if iconAnimate === "Spin"}
-    <Icon class="faIcon" data={faStyle[faName]} scale="{fScale}" flip="{iconFlip.toLowerCase()}" spin style="color: {iconColour}"/>
-  {:else if iconAnimate === "Pulse"}
-    <Icon class="faIcon" data={faStyle[faName]} scale="{fScale}" flip="{iconFlip.toLowerCase()}" pulse style="color: {iconColour}"/>
-  {:else}
-    <Icon class="faIcon" data={faStyle[faName]} scale="{fScale}" flip="{iconFlip.toLowerCase()}" style="color: {iconColour}"/>
-  {/if}
+  <Provider {actions} data={dataContext}>
+    <Elements
+      {stripe}
+      {theme}
+      {labels}
+      {variables}
+      {rules}
+      bind:elements
+    >
+    {#if elementType === 'payment'}
+      <PaymentElement options={elementOptions}/>
+    {:else if elementType === 'address'}
+      <Address {...elementOptions} />
+    {:else if elementType === 'card'}
+      <Card {...elementOptions} />
+    {:else}
+      <p>Unknown element type: {elementType}</p>
+    {/if}
+    </Elements>
+  </Provider>
 </div>
-
-<style></style>

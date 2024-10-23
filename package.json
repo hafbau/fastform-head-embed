@@ -1,9 +1,9 @@
 {
-  "name": "bb-fontawesome",
+  "name": "bb-stripe-elements",
   "version": "1.0.0",
-  "description": "A FontAwesome component for Fastform",
+  "description": "A Stripe Elements component for Fastform",
   "license": "MIT",
-  "author": "Matthew Strachan",
+  "author": "Hafiz Suara",
   "svelte": "index.js",
   "module": "dist/plugin.min.js",
   "scripts": {
@@ -12,11 +12,10 @@
   },
   "dependencies": {
     "@crownframework/svelte-error-boundary": "^1.0.3",
-    "@fortawesome/free-solid-svg-icons": "^6.4.2",
-    "@fortawesome/free-regular-svg-icons": "^6.4.2",
-    "@fortawesome/free-brands-svg-icons": "^6.4.2",
+    "@stripe/stripe-js": "^4.9.0",
+    "stripe": "^17.2.1",
     "svelte": "^3.49.0",
-    "svelte-awesome": "^3.0.1"
+    "svelte-stripe": "^1.2.1"
   },
   "devDependencies": {
     "@budibase/backend-core": "^2.0.13",
