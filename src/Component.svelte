@@ -79,6 +79,7 @@
 <div use:styleable={$component.styles}>
   <Provider {actions} data={dataContext}>
     <Elements
+      mode="setup"
       {stripe}
       {theme}
       {labels}
