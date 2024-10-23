@@ -38,8 +38,8 @@
   
 
   setContext("stripe-elements", {
-    __stripe,
-    __elements,
+    __stripe: stripe,
+    __elements: elements,
     __token: "",
     processing: false,
     tokenizeAttempt: 0
