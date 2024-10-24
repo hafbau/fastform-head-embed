@@ -1,8 +1,7 @@
 <script>
-  import { getContext } from "svelte"
-  import { onMount } from 'svelte'
-  import { loadStripe } from '@stripe/stripe-js'
-  import { Elements, PaymentElement, Address, Card } from 'svelte-stripe'
+  import { getContext, onMount } from "svelte"
+  import { loadStripe } from "@stripe/stripe-js"
+  import { Elements, PaymentElement, Address, Card } from "svelte-stripe"
 
 
   export let PUBLIC_STRIPE_KEY
