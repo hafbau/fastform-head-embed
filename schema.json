@@ -72,9 +72,6 @@
         ]
       }
     ],
-    "actions": [
-      "TokenizeElements"
-    ],
     "context": [
       {
         "type": "static",

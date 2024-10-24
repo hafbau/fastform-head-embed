@@ -69,17 +69,11 @@
       }
     });
   }
-  const actions = [
-    {
-      type: 'TokenizeElements',
-      callback: tokenize,
-    }
-  ]
   $: dataContext =  getContext("stripe-elements");
 </script>
 
 <div use:styleable={$component.styles}>
-  <Provider {actions} data={dataContext}>
+  <Provider data={dataContext}>
     <Elements
       mode="setup"
       currency="usd"
