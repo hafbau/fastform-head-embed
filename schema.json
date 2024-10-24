@@ -6,28 +6,6 @@
     "friendlyName": "Stripe Elements",
     "description": "A Stripe Elements component for Fastform",
     "icon": "CreditCard",
-    "context": [
-      {
-        "type": "static",
-        "values": [
-          {
-            "label": "Stripe Token",
-            "key": "__token",
-            "type": "string"
-          },
-          {
-            "label": "Stripe",
-            "key": "__stripe",
-            "type": "object"
-          },
-          {
-            "label": "Elements",
-            "key": "__elements",
-            "type": "object"
-          }
-        ]
-      }
-    ],
     "settings": [
       {
         "type": "text",
@@ -90,6 +68,31 @@
             "key": "rules",
             "label": "JSON of Stripe Appearance Rules",
             "defaultValue": "{}"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      "TokenizeElements"
+    ],
+    "context": [
+      {
+        "type": "static",
+        "values": [
+          {
+            "label": "Stripe Token",
+            "key": "__token",
+            "type": "string"
+          },
+          {
+            "label": "Stripe",
+            "key": "__stripe",
+            "type": "object"
+          },
+          {
+            "label": "Elements",
+            "key": "__elements",
+            "type": "object"
           }
         ]
       }
