@@ -1,5 +1,5 @@
 <script>
-  import { getContext, setContext } from "svelte"
+  import { getContext } from "svelte"
   import { onMount } from 'svelte'
   import { loadStripe } from '@stripe/stripe-js'
   import { Elements, PaymentElement, Address, Card } from 'svelte-stripe'
@@ -15,11 +15,15 @@
   export let elementsOptions
   export let variables
 
-  const { styleable, Provider } = getContext("sdk")
+  export let onSubmit
+
+  const { styleable } = getContext("sdk")
   const component = getContext("component")
   let stripe = null
   let elements
-
+  let processing = false
+  let token = ""
+  let error
   onMount(async () => {
     stripe = await loadStripe(PUBLIC_STRIPE_KEY)
   })
@@ -28,6 +32,7 @@
     try {
       return JSON.parse(value)
     } catch (e) {
+      console.log('StripeElements::Error parsing', value)
       console.error(e)
       return {}
     }
@@ -39,47 +44,39 @@
   $: variables = tryParse(variables)
   
 
-  setContext("stripe-elements", {
+  $: dataContext = {
     __stripe: stripe,
     __elements: elements,
-    __token: "",
-    processing: false,
-    tokenizeAttempt: 0
-  });
+    __token: token,
+    processing: processing
+  };
 
-  function tokenize() {
-    const ctx = getContext("stripe-elements");
-    console.log('TokenizeElements', ctx);
-    if (ctx?.tokenizeAttempt > 3) {
-      console.log('TokenizeElements failed after 3 attempts');
-      setContext("stripe-elements", { ...ctx, processing: false, tokenizeAttempt: 0 });
-      return;
-    }
-    if (ctx?.__token) return ctx.__token;
-    if (ctx?.processing) return;
-    setContext("stripe-elements", { ...ctx, processing: true, tokenizeAttempt: ctx.tokenizeAttempt + 1 });
-    return stripe.createToken(elements).then((result) => {
-      if (result.error) {
-        console.log('Error', result.error)
-        setContext("stripe-elements", { ...ctx, processing: false, tokenizeAttempt: 0 });
-      } else {
-        console.log('Success', result.token)
-        setContext("stripe-elements", { ...ctx, processing: false, __token: result.token, tokenizeAttempt: 0 });
-        return result.token;
+  async function tokenize() {
+    console.log('TokenizeElements', $dataContext);
+    if ($dataContext?.__token) return $dataContext.__token;
+    if ($dataContext?.processing) return;
+    processing = true;
+    const result = await stripe.createToken(elements);
+    if (result.error) {
+      console.log('Error', result.error)
+      error = result.error;
+      processing = false;
+    } else {
+      console.log('Success', result.token)
+      processing = false;
+      token = result.token;
+      if (onSubmit) {
+        onSubmit({token, ...$dataContext});
       }
-    });
-  }
-  const actions = [
-    {
-      type: 'TokenizeElements',
-      callback: tokenize,
     }
-  ]
-  $: dataContext =  getContext("stripe-elements");
+  }
 </script>
 
 <div use:styleable={$component.styles}>
-  <Provider {actions} data={dataContext}>
+  {#if error}
+    <p class="error">{error.message} Please try again.</p>
+  {/if}
+  <!-- <Provider data={dataContext}> -->
     <Elements
       mode="setup"
       currency="usd"
@@ -91,15 +88,24 @@
       {rules}
       bind:elements
     >
-    {#if elementType === 'payment'}
-      <PaymentElement options={elementOptions}/>
-    {:else if elementType === 'address'}
-      <Address {...elementOptions} />
-    {:else if elementType === 'card'}
-      <Card {...elementOptions} />
-    {:else}
-      <p>Unknown element type: {elementType}</p>
-    {/if}
+      <form on:submit|preventDefault={tokenize}>
+        {#if elementType === 'payment'}
+          <PaymentElement options={elementOptions}/>
+        {:else if elementType === 'address'}
+          <Address {...elementOptions} />
+        {:else if elementType === 'card'}
+          <Card {...elementOptions} />
+        {:else}
+          <p>Unknown element type: {elementType}</p>
+        {/if}
+        <button type="submit" disabled={processing}>
+          {#if processing}
+            Processing...
+          {:else}
+            Continue
+          {/if}
+        </button>
+      </form>
     </Elements>
-  </Provider>
+  <!-- </Provider> -->
 </div>

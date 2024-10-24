@@ -21,6 +21,30 @@
         "defaultValue": "payment"
       },
       {
+        "type": "event",
+        "label": "On Submit",
+        "key": "onSubmit",
+        "required": true,
+        "context": [
+          {
+            "label": "Token",
+            "key": "token"
+          },
+          {
+            "label": "Elements",
+            "key": "__element"
+          },
+          {
+            "label": "Stripe",
+            "key": "__stripe"
+          },
+          {
+            "label": "Processing",
+            "key": "processing"
+          }
+        ]
+      },
+      {
         "type": "text",
         "key": "elementsOptions",
         "label": "JSON of Stripe Elements Options",
@@ -68,31 +92,6 @@
             "key": "rules",
             "label": "JSON of Stripe Appearance Rules",
             "defaultValue": "{}"
-          }
-        ]
-      }
-    ],
-    "actions": [
-      "TokenizeElements"
-    ],
-    "context": [
-      {
-        "type": "static",
-        "values": [
-          {
-            "label": "Stripe Token",
-            "key": "__token",
-            "type": "string"
-          },
-          {
-            "label": "Stripe",
-            "key": "__stripe",
-            "type": "object"
-          },
-          {
-            "label": "Elements",
-            "key": "__elements",
-            "type": "object"
           }
         ]
       }
