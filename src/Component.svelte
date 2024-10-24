@@ -16,7 +16,7 @@
 
   // export let onSubmit
 
-  const { styleable } = getContext("sdk")
+  const { styleable, Provider } = getContext("sdk")
   const component = getContext("component")
   let stripe = null
   let elements
@@ -57,7 +57,7 @@
     } else {
       token = result.token
       processing = false
-      onSubmit(token)
+      // onSubmit(token)
     }
   }
 
@@ -76,7 +76,7 @@
   {#if error}
     <p class="error">{error.message} Please try again.</p>
   {/if}
-  <!-- <Provider data={dataContext}> -->
+  <Provider data={dataContext}>
     <Elements
       mode="setup"
       currency="usd"
@@ -98,14 +98,14 @@
         {:else}
           <p>Unknown element type: {elementType}</p>
         {/if}
-        <button type="submit" disabled={processing}>
+        <!-- <button type="submit" disabled={processing}>
           {#if processing}
             Processing...
           {:else}
             Continue
           {/if}
-        </button>
+        </button> -->
       <!-- </form> -->
     </Elements>
-  <!-- </Provider> -->
+  </Provider>
 </div>
