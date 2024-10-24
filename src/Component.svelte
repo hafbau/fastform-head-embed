@@ -17,7 +17,7 @@
 
   export let onSubmit
 
-  const { styleable } = getContext("sdk")
+  const { styleable, Provider } = getContext("sdk")
   const component = getContext("component")
   let stripe = null
   let elements
@@ -76,7 +76,7 @@
   {#if error}
     <p class="error">{error.message} Please try again.</p>
   {/if}
-  <!-- <Provider data={dataContext}> -->
+  <Provider data={dataContext}>
     <Elements
       mode="setup"
       currency="usd"
@@ -107,5 +107,5 @@
         </button>
       </form>
     </Elements>
-  <!-- </Provider> -->
+  </Provider>
 </div>
