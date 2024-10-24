@@ -15,7 +15,7 @@
   export let elementsOptions
   export let variables
 
-  export let onSubmit
+  // export let onSubmit
 
   const { styleable } = getContext("sdk")
   const component = getContext("component")
@@ -61,7 +61,7 @@
       onSubmit(token)
     }
   }
-  
+
   function tokenize() {
     console.log('TokenizeElements', $dataContext);
     if ($dataContext?.__token) return $dataContext.__token;
@@ -89,7 +89,7 @@
       {rules}
       bind:elements
     >
-      <form on:submit|preventDefault={tokenize}>
+      <!-- <form on:submit|preventDefault={tokenize}> -->
         {#if elementType === 'payment'}
           <PaymentElement options={elementOptions}/>
         {:else if elementType === 'address'}
@@ -106,7 +106,7 @@
             Continue
           {/if}
         </button>
-      </form>
+      <!-- </form> -->
     </Elements>
   <!-- </Provider> -->
 </div>

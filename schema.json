@@ -21,30 +21,6 @@
         "defaultValue": "payment"
       },
       {
-        "type": "event",
-        "label": "On Submit",
-        "key": "onSubmit",
-        "required": true,
-        "context": [
-          {
-            "label": "Token",
-            "key": "token"
-          },
-          {
-            "label": "Elements",
-            "key": "__element"
-          },
-          {
-            "label": "Stripe",
-            "key": "__stripe"
-          },
-          {
-            "label": "Processing",
-            "key": "processing"
-          }
-        ]
-      },
-      {
         "type": "text",
         "key": "elementsOptions",
         "label": "JSON of Stripe Elements Options",
