@@ -17,7 +17,7 @@
 
   export let onSubmit
 
-  const { styleable, Provider } = getContext("sdk")
+  const { styleable } = getContext("sdk")
   const component = getContext("component")
   let stripe = null
   let elements
@@ -51,24 +51,25 @@
     processing: processing
   };
 
-  async function tokenize() {
+  function handleResult(result) {
+    if (result.error) {
+      error = result.error
+      processing = false
+    } else {
+      token = result.token
+      processing = false
+      onSubmit(token)
+    }
+  }
+  
+  function tokenize() {
     console.log('TokenizeElements', $dataContext);
     if ($dataContext?.__token) return $dataContext.__token;
     if ($dataContext?.processing) return;
     processing = true;
-    const result = await stripe.createToken(elements);
-    if (result.error) {
-      console.log('Error', result.error)
-      error = result.error;
-      processing = false;
-    } else {
-      console.log('Success', result.token)
-      processing = false;
-      token = result.token;
-      if (onSubmit) {
-        onSubmit({token, ...$dataContext});
-      }
-    }
+    stripe.createToken(elements).then(result => {
+      handleResult(result);
+    })
   }
 </script>
 
@@ -76,7 +77,7 @@
   {#if error}
     <p class="error">{error.message} Please try again.</p>
   {/if}
-  <Provider data={dataContext}>
+  <!-- <Provider data={dataContext}> -->
     <Elements
       mode="setup"
       currency="usd"
@@ -107,5 +108,5 @@
         </button>
       </form>
     </Elements>
-  </Provider>
+  <!-- </Provider> -->
 </div>
