@@ -20,6 +20,8 @@
   const component = getContext("component")
   let stripe = null
   let elements
+  let element
+  let name
 
   onMount(async () => {
     stripe = await loadStripe(PUBLIC_STRIPE_KEY)
@@ -49,7 +51,7 @@
 
   async function submit() {
     dataContext.processing = true
-    const token = await stripe.createToken(elements);
+    const token = await stripe.createToken(element, { name });
     dataContext.processing = false
     dataContext.__token = token
     onSubmit?.({token})
@@ -70,12 +72,19 @@
       bind:elements
     >
       <form on:submit|preventDefault={submit}>
+        <input name="name" bind:value={name} placeholder="Your name" disabled={dataContext.processing} />
+    <!-- <CardNumber bind:element={cardElement} classes={{ base: 'input' }} />
+
+    <div class="row">
+      <CardExpiry classes={{ base: 'input' }} />
+      <CardCvc classes={{ base: 'input' }} />
+    </div> -->
         {#if elementType === 'payment'}
-          <PaymentElement options={elementOptions}/>
+          <PaymentElement bind:element={element} options={elementOptions}/>
         {:else if elementType === 'address'}
-          <Address  mode='billing' {...elementOptions} />
+          <Address bind:element={element} mode='billing' {...elementOptions} />
         {:else if elementType === 'card'}
-          <Card {...elementOptions} />
+          <Card bind:element={element} {...elementOptions} />
         {:else}
           <p>Unknown element type: {elementType}</p>
         {/if}
