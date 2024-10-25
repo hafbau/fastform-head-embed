@@ -46,6 +46,14 @@
     processing: false,
     tokenizeAttempt: 0
   }
+
+  async function submit() {
+    dataContext.processing = true
+    const token = await elements.createToken()
+    dataContext.processing = false
+    dataContext.__token = token
+    onSubmit?.({token})
+  }
 </script>
 
 <div use:styleable={$component.styles}>
@@ -61,15 +69,24 @@
       {rules}
       bind:elements
     >
-    {#if elementType === 'payment'}
-      <PaymentElement options={elementOptions}/>
-    {:else if elementType === 'address'}
-      <Address {...elementOptions} />
-    {:else if elementType === 'card'}
-      <Card {...elementOptions} />
-    {:else}
-      <p>Unknown element type: {elementType}</p>
-    {/if}
+      <form on:submit|preventDefault={submit}>
+        {#if elementType === 'payment'}
+          <PaymentElement options={elementOptions}/>
+        {:else if elementType === 'address'}
+          <Address  mode='billing' {...elementOptions} />
+        {:else if elementType === 'card'}
+          <Card {...elementOptions} />
+        {:else}
+          <p>Unknown element type: {elementType}</p>
+        {/if}
+        <button disabled={dataContext.processing}>
+          {#if dataContext.processing}
+            Processing...
+          {:else}
+            Pay
+          {/if}
+        </button>
+      </form>
     </Elements>
   </Provider>
 </div>
