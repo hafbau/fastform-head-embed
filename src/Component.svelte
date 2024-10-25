@@ -14,6 +14,7 @@
   export let elementOptions
   export let elementsOptions
   export let variables
+  export let onSubmit
 
   const { styleable, Provider } = getContext("sdk")
   const component = getContext("component")
