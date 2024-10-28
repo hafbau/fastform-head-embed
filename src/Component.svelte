@@ -106,12 +106,12 @@
     gap: 5px;
   }
 
-  /* input, */
   :global(.stripe-elements-input) {
     border: solid 1px #cacaca;
-    padding: 1.2rem;
+    padding: 1em;
     border-radius: 5px;
     background: white;
+    margin-bottom: 1.5em;
   }
 
   .row :global(.stripe-elements-input) {
