@@ -6,7 +6,6 @@
 
 
   export let PUBLIC_STRIPE_KEY
-  // export let elementType
   export let theme
   export let labels
 
@@ -46,7 +45,6 @@
     __elements: elements,
     __token: "",
     processing: false,
-    tokenizeAttempt: 0
   }
 
   $: error = ''
@@ -83,24 +81,15 @@
       {rules}
       bind:elements
     >
-      <!-- <form on:submit|preventDefault={submit}> -->
-      <CardNumber bind:element={element} classes={{ base: 'stripe-elements-input' }} />
+      <CardNumber bind:element={element} classes={{ base: 'stripe-elements-input' }} {...elementOptions}/>
 
       <div class="row">
-        <CardExpiry classes={{ base: 'stripe-elements-input' }} />
-        <CardCvc classes={{ base: 'stripe-elements-input' }} />
+        <CardExpiry classes={{ base: 'stripe-elements-input' }} {...elementOptions}/>
+        <CardCvc classes={{ base: 'stripe-elements-input' }} {...elementOptions}/>
       </div>
       <div on:click|preventDefault={submit} on:keyup={submit}>
         <slot />
       </div>
-        <!-- <button disabled={dataContext.processing}>
-          {#if dataContext.processing}
-            Processing...
-          {:else}
-            Continue
-          {/if}
-        </button> -->
-      <!-- </form> -->
     </Elements>
   </Provider>
 </div>
@@ -111,13 +100,6 @@
     margin: 2rem 0 0;
   }
 
-  /* form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 2rem 0;
-  } */
-
   .row {
     display: flex;
     flex-direction: row;
@@ -126,23 +108,13 @@
 
   /* input, */
   :global(.stripe-elements-input) {
-    border: solid 1px var(--gray-color);
-    padding: 1rem;
+    border: solid 1px #cacaca;
+    padding: 1.2rem;
     border-radius: 5px;
     background: white;
   }
 
-  /* .row :global(.stripe-elements-input) {
-    width: 20%;
-  } */
-
-  /* button {
-    padding: 1rem;
-    border-radius: 5px;
-    border: solid 1px #ccc;
-    color: white;
-    background: var(--link-color);
-    font-size: 1.2rem;
-    margin: 1rem 0;
-  } */
+  .row :global(.stripe-elements-input) {
+    width: 30%;
+  }
 </style>
