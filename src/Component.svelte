@@ -69,7 +69,7 @@
 
 <div use:styleable={$component.styles}>
   {#if error}
-    <p class="error">{error.message} Please try again.</p>
+    <p class="error">{error} Please try again.</p>
   {/if}
   <Provider data={dataContext}>
     <Elements
