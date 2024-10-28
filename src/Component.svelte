@@ -52,10 +52,12 @@
   async function submit() {
     try {
       dataContext.processing = true
-      const token = await stripe.createToken(element, { name });
+      const {token, error} = await stripe.createToken(element, { name });
       dataContext.processing = false
-      dataContext.__token = token
-      onSubmit?.({token})
+      if (token) {
+        dataContext.__token = token
+        onSubmit?.({token})
+      } else throw error
     } catch (e) {
       dataContext.processing = false
       console.error(e);
