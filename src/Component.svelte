@@ -2,11 +2,11 @@
   import { getContext } from "svelte"
   import { onMount } from 'svelte'
   import { loadStripe } from '@stripe/stripe-js'
-  import { Elements, PaymentElement, Address, Card } from 'svelte-stripe'
+  import { Elements, CardNumber, CardCvc, CardExpiry } from 'svelte-stripe'
 
 
   export let PUBLIC_STRIPE_KEY
-  export let elementType
+  // export let elementType
   export let theme
   export let labels
 
@@ -49,16 +49,28 @@
     tokenizeAttempt: 0
   }
 
+  $: error = ''
+
   async function submit() {
-    dataContext.processing = true
-    const token = await stripe.createToken(element, { name });
-    dataContext.processing = false
-    dataContext.__token = token
-    onSubmit?.({token})
+    try {
+      dataContext.processing = true
+      const token = await stripe.createToken(element, { name });
+      dataContext.processing = false
+      dataContext.__token = token
+      onSubmit?.({token})
+    } catch (e) {
+      dataContext.processing = false
+      console.error(e);
+      error = e?.message ?? e
+    }
   }
 </script>
 
+
 <div use:styleable={$component.styles}>
+  {#if error}
+    <p class="error">{error.message} Please try again.</p>
+  {/if}
   <Provider data={dataContext}>
     <Elements
       mode="setup"
@@ -71,31 +83,66 @@
       {rules}
       bind:elements
     >
-      <form on:submit|preventDefault={submit}>
-        <input name="name" bind:value={name} placeholder="Your name" disabled={dataContext.processing} />
-    <!-- <CardNumber bind:element={cardElement} classes={{ base: 'input' }} />
+      <!-- <form on:submit|preventDefault={submit}> -->
+      <CardNumber bind:element={element} classes={{ base: 'stripe-elements-input' }} />
 
-    <div class="row">
-      <CardExpiry classes={{ base: 'input' }} />
-      <CardCvc classes={{ base: 'input' }} />
-    </div> -->
-        {#if elementType === 'payment'}
-          <PaymentElement bind:element={element} options={elementOptions}/>
-        {:else if elementType === 'address'}
-          <Address bind:element={element} mode='billing' {...elementOptions} />
-        {:else if elementType === 'card'}
-          <Card bind:element={element} {...elementOptions} />
-        {:else}
-          <p>Unknown element type: {elementType}</p>
-        {/if}
-        <button disabled={dataContext.processing}>
+      <div class="row">
+        <CardExpiry classes={{ base: 'stripe-elements-input' }} />
+        <CardCvc classes={{ base: 'stripe-elements-input' }} />
+      </div>
+      <div on:click|preventDefault={submit} on:keyup={submit}>
+        <slot />
+      </div>
+        <!-- <button disabled={dataContext.processing}>
           {#if dataContext.processing}
             Processing...
           {:else}
-            Pay
+            Continue
           {/if}
-        </button>
-      </form>
+        </button> -->
+      <!-- </form> -->
     </Elements>
   </Provider>
 </div>
+
+<style>
+  .error {
+    color: tomato;
+    margin: 2rem 0 0;
+  }
+
+  /* form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 2rem 0;
+  } */
+
+  .row {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+  }
+
+  /* input, */
+  :global(.stripe-elements-input) {
+    border: solid 1px var(--gray-color);
+    padding: 1rem;
+    border-radius: 5px;
+    background: white;
+  }
+
+  /* .row :global(.stripe-elements-input) {
+    width: 20%;
+  } */
+
+  /* button {
+    padding: 1rem;
+    border-radius: 5px;
+    border: solid 1px #ccc;
+    color: white;
+    background: var(--link-color);
+    font-size: 1.2rem;
+    margin: 1rem 0;
+  } */
+</style>

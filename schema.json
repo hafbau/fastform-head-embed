@@ -6,6 +6,8 @@
     "friendlyName": "Stripe Elements",
     "description": "A Stripe Elements component for Fastform",
     "icon": "CreditCard",
+    "hasChildren": true,
+    "showEmptyState": false,
     "settings": [
       {
         "type": "text",
