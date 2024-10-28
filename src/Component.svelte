@@ -39,15 +39,15 @@
   $: elementOptions = tryParse(elementOptions)
   $: elementsOptions = tryParse(elementsOptions)
   $: variables = tryParse(variables)
-  
+
+  $: error = ''
   $: dataContext =  {
     __stripe: stripe,
     __elements: elements,
     __token: "",
     processing: false,
+    __error: error
   }
-
-  $: error = ''
 
   async function submit() {
     try {

@@ -107,6 +107,11 @@
             "type": "string"
           },
           {
+            "label": "Error",
+            "key": "__error",
+            "type": "string"
+          },
+          {
             "label": "Stripe",
             "key": "__stripe",
             "type": "object"
