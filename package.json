@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "@crownframework/svelte-error-boundary": "^1.0.3",
-    "svelte": "^3.49.0",
+    "svelte": "^5.25.3"
   },
   "devDependencies": {
-    "@budibase/backend-core": "^2.0.13",
+    "@budibase/backend-core": "^3.7.3",
     "@rollup/plugin-commonjs": "^18.0.0",
     "@rollup/plugin-node-resolve": "^11.2.1",
     "npm-run-all": "^4.1.5",
