@@ -39,10 +39,10 @@
 
   // Function to wrap content in script tags if needed
   function wrapInScript(content) {
-    if (content.trim().startsWith('<script') && content.trim().endsWith('</script>')) {
+    if (content.trim().startsWith('<script') && content.trim().endsWith('</script\>')) {
       return content
     }
-    return `<script>${content}</script>`
+    return `<script>${content}</script\>`
   }
 
   // Function to safely add element to head
