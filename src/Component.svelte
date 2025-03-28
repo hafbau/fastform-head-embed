@@ -15,17 +15,26 @@
   let error = null
   let addedElements = []
 
+  // Constants for script tags to avoid string issues
+  const SCRIPT_START = "<script"
+  const SCRIPT_END = "</script\>"
+
   // Function to check if content is valid for head tag
   function isValidHeadContent(content) {
     // Check if content is already wrapped in script tags
-    if (content.trim().startsWith("<script") && content.trim().endsWith("</script\>")) {
+    if (content.trim().startsWith(SCRIPT_START) && content.trim().endsWith(SCRIPT_END)) {
       return true
     }
     
     // Check if content contains only valid head elements
     const validHeadElements = ['script', 'link', 'meta', 'title', 'base', 'style']
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(content, 'text/html')
+    let doc
+    try {
+      doc = new DOMParser().parseFromString(content, 'text/html')
+    } catch (e) {
+      console.error("Error parsing content:", e)
+      return false
+    }
     const elements = doc.head.children
     
     // If there are no elements, content might be inline script
@@ -39,38 +48,42 @@
 
   // Function to wrap content in script tags if needed
   function wrapInScript(content) {
-    if (content.trim().startsWith('<script') && content.trim().endsWith('</script\>')) {
+    if (content.trim().startsWith(SCRIPT_START) && content.trim().endsWith(SCRIPT_END)) {
       return content
     }
-    return `<script>${content}</script\>`
+    return `${SCRIPT_START}>${content}${SCRIPT_END}`
   }
 
   // Function to safely add element to head
   async function addElementToHead(element) {
     return new Promise((resolve, reject) => {
       if (element.tagName === 'SCRIPT') {
-        // For scripts, create a new script element and copy attributes
-        const newScript = document.createElement('script')
-        Array.from(element.attributes).forEach(attr => {
-          newScript.setAttribute(attr.name, attr.value)
-        })
-        
-        // Handle script loading
-        if (element.src) {
-          newScript.onload = () => {
+        try {
+          // For scripts, create a new script element and copy attributes
+          const newScript = document.createElement('script')
+          Array.from(element.attributes).forEach(attr => {
+            newScript.setAttribute(attr.name, attr.value)
+          })
+          
+          // Handle script loading
+          if (element.src) {
+            newScript.onload = () => {
+              addedElements.push(newScript)
+              resolve()
+            }
+            newScript.onerror = (e) => {
+              reject(new Error(`Failed to load script: ${element.src}`))
+            }
+          } else {
+            newScript.textContent = element.textContent
             addedElements.push(newScript)
             resolve()
           }
-          newScript.onerror = (e) => {
-            reject(new Error(`Failed to load script: ${element.src}`))
-          }
-        } else {
-          newScript.textContent = element.textContent
-          addedElements.push(newScript)
-          resolve()
+          
+          document.head.appendChild(newScript)
+        } catch (error) {
+          reject(new Error(`Failed to create script element: ${error.message}`))
         }
-        
-        document.head.appendChild(newScript)
       } else {
         // For other elements, clone and append
         const newElement = element.cloneNode(true)
