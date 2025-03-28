@@ -13,20 +13,22 @@
 
   let status = 'initializing'
   let error = null
-  let headContent = ''
-
-  // Constants for script tags to avoid string issues
-  const SCRIPT_START = "<script"
-  const SCRIPT_END = "</script\>"
+  let scriptContent = ''
 
   // Function to check if content is valid for head tag
   function isValidHeadContent(content) {
-    // Check if content is already wrapped in script tags
-    if (content.trim().startsWith(SCRIPT_START) && content.trim().endsWith(SCRIPT_END)) {
-      return true
+    // For simple script content, just check if it's valid JavaScript
+    if (!content.includes('<')) {
+      try {
+        // Try to parse as JavaScript
+        new Function(content)
+        return true
+      } catch (e) {
+        return false
+      }
     }
     
-    // Check if content contains only valid head elements
+    // For HTML content, check if it contains only valid head elements
     const validHeadElements = ['script', 'link', 'meta', 'title', 'base', 'style']
     let doc
     try {
@@ -46,14 +48,6 @@
     return Array.from(elements).every(el => validHeadElements.includes(el.tagName.toLowerCase()))
   }
 
-  // Function to wrap content in script tags if needed
-  function wrapInScript(content) {
-    if (content.trim().startsWith(SCRIPT_START) && content.trim().endsWith(SCRIPT_END)) {
-      return content
-    }
-    return `${SCRIPT_START}>${content}${SCRIPT_END}`
-  }
-
   onMount(async () => {
     try {
       status = 'loading'
@@ -66,13 +60,13 @@
         throw new Error('No content provided')
       }
 
-      // Check if content is valid for head
+      // Check if content is valid
       if (!isValidHeadContent(content)) {
-        throw new Error("Invalid content for head tag. Only script, link, meta, title, base, and style elements are allowed.")
+        throw new Error("Invalid content. Must be valid JavaScript or HTML with valid head elements.")
       }
 
-      // Wrap in script tags if needed
-      headContent = wrapInScript(content)
+      // Set the script content
+      scriptContent = content
 
       status = 'embedded'
       onEmbedded?.()
@@ -87,7 +81,11 @@
 </script>
 
 <svelte:head>
-  {@html headContent}
+  {#if scriptContent}
+    <script>
+      {scriptContent}
+    </script>
+  {/if}
 </svelte:head>
 
 <div use:styleable={$component.styles}>
