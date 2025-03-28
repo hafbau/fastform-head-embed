@@ -13,7 +13,7 @@
 
   let status = 'initializing'
   let error = null
-  let addedElements = []
+  let headContent = ''
 
   // Constants for script tags to avoid string issues
   const SCRIPT_START = "<script"
@@ -54,46 +54,6 @@
     return `${SCRIPT_START}>${content}${SCRIPT_END}`
   }
 
-  // Function to safely add element to head
-  async function addElementToHead(element) {
-    return new Promise((resolve, reject) => {
-      if (element.tagName === 'SCRIPT') {
-        try {
-          // For scripts, create a new script element and copy attributes
-          const newScript = document.createElement('script')
-          Array.from(element.attributes).forEach(attr => {
-            newScript.setAttribute(attr.name, attr.value)
-          })
-          
-          // Handle script loading
-          if (element.src) {
-            newScript.onload = () => {
-              addedElements.push(newScript)
-              resolve()
-            }
-            newScript.onerror = (e) => {
-              reject(new Error(`Failed to load script: ${element.src}`))
-            }
-          } else {
-            newScript.textContent = element.textContent
-            addedElements.push(newScript)
-            resolve()
-          }
-          
-          document.head.appendChild(newScript)
-        } catch (error) {
-          reject(new Error(`Failed to create script element: ${error.message}`))
-        }
-      } else {
-        // For other elements, clone and append
-        const newElement = element.cloneNode(true)
-        addedElements.push(newElement)
-        document.head.appendChild(newElement)
-        resolve()
-      }
-    })
-  }
-
   onMount(async () => {
     try {
       status = 'loading'
@@ -112,17 +72,7 @@
       }
 
       // Wrap in script tags if needed
-      const preparedContent = wrapInScript(content)
-
-      // Create a temporary div to parse the content
-      const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = preparedContent
-
-      // Move all elements to head
-      const elements = Array.from(tempDiv.children)
-      for (const element of elements) {
-        await addElementToHead(element)
-      }
+      headContent = wrapInScript(content)
 
       status = 'embedded'
       onEmbedded?.()
@@ -134,17 +84,11 @@
       dispatch('error', { error: e.message })
     }
   })
-
-  // Cleanup on component destruction
-  onDestroy(() => {
-    // Remove all added elements from head
-    addedElements.forEach(element => {
-      if (element.parentNode === document.head) {
-        document.head.removeChild(element)
-      }
-    })
-  })
 </script>
+
+<svelte:head>
+  {@html headContent}
+</svelte:head>
 
 <div use:styleable={$component.styles}>
   <Provider data={{ status, error }}>
