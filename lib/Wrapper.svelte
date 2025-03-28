@@ -1,6 +1,6 @@
 <script>
     import Component from "../src/Component.svelte"
-    import Boundary from "./Boundary.js"
+    import Boundary from "./Boundary.svelte" 
 </script>
 
 <Boundary>
