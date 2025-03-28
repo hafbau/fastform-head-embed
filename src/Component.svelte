@@ -13,7 +13,7 @@
 
   let status = 'initializing'
   let error = null
-  let scriptContent = ''
+  let headContent = ''
 
   // Function to check if content is valid for head tag
   function isValidHeadContent(content) {
@@ -65,8 +65,8 @@
         throw new Error("Invalid content. Must be valid JavaScript or HTML with valid head elements.")
       }
 
-      // Set the script content
-      scriptContent = content
+      // Set the head content
+      headContent = content
 
       status = 'embedded'
       onEmbedded?.()
@@ -81,10 +81,14 @@
 </script>
 
 <svelte:head>
-  {#if scriptContent}
-    <script>
-      {scriptContent}
-    </script>
+  {#if headContent}
+    {#if !headContent.includes('<')}
+      <script>
+        {headContent}
+      </script>
+    {:else}
+      {@html headContent}
+    {/if}
   {/if}
 </svelte:head>
 
