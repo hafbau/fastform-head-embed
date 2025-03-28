@@ -2,99 +2,37 @@
   "type": "component",
   "metadata": {},
   "schema": {
-    "name": "bb-stripe-elements",
-    "friendlyName": "Stripe Elements",
-    "description": "A Stripe Elements component for Fastform",
-    "icon": "CreditCard",
-    "hasChildren": true,
+    "name": "bb-head-embed",
+    "friendlyName": "Head Embed",
+    "description": "Embed content in the HTML head tag of the page. Supports scripts, meta tags, and other valid head elements.",
+    "icon": "FileCode",
+    "hasChildren": false,
     "showEmptyState": false,
     "settings": [
       {
         "type": "text",
-        "key": "PUBLIC_STRIPE_KEY",
-        "label": "Public Stripe Key",
+        "key": "content",
+        "label": "Head Content",
+        "description": "Content to embed in the HTML head tag. Will be automatically wrapped in script tags if needed. Supports scripts, meta tags, link tags, and other valid head elements.",
         "required": true
       },
       {
         "type": "event",
-        "label": "On Submit",
-        "key": "onSubmit",
-        "context": [
-          {
-            "label": "Token",
-            "key": "token"
-          },
-          {
-            "label": "Elements",
-            "key": "__element"
-          },
-          {
-            "label": "Stripe",
-            "key": "__stripe"
-          },
-          {
-            "label": "Processing",
-            "key": "processing"
-          }
-        ]
+        "label": "On Mount",
+        "key": "onMount",
+        "description": "Triggered when the component mounts"
       },
       {
-        "type":"select",
-        "key":"elementType",
-        "label":"Element Type",
-        "options": ["payment", "address", "card"],
-        "defaultValue": "payment"
+        "type": "event",
+        "label": "On Embedded",
+        "key": "onEmbedded",
+        "description": "Triggered when the content is successfully embedded in the head"
       },
       {
-        "type": "text",
-        "key": "elementsOptions",
-        "label": "JSON of Stripe Elements Options",
-        "defaultValue": "{}"
-      },
-      {
-        "type": "text",
-        "key": "elementOptions",
-        "label": "JSON of Stripe Element Options",
-        "defaultValue": "{}"
-      },
-      {
-        "type": "section",
-        "section": true,
-        "label": "Appearance",
-        "settings": [
-          {
-            "type": "select",
-            "key": "theme",
-            "label": "Elements Theme",
-            "options": ["stripe", "night", "flat"],
-            "defaultValue": "stripe"
-          },
-          {
-            "type": "select",
-            "key": "labels",
-            "label": "Elements Labels Configuration",
-            "options": ["above", "floating"],
-            "defaultValue": "above"
-          },
-          {
-            "type": "boolean",
-            "key": "disableAnimations",
-            "label": "Disable Animations",
-            "defaultValue": false
-          },
-          {
-            "type": "text",
-            "key": "variables",
-            "label": "JSON of Stripe Appearance Variables",
-            "defaultValue": "{}"
-          },
-          {
-            "type": "text",
-            "key": "rules",
-            "label": "JSON of Stripe Appearance Rules",
-            "defaultValue": "{}"
-          }
-        ]
+        "type": "event",
+        "label": "On Error",
+        "key": "onError",
+        "description": "Triggered when there is an error embedding the content"
       }
     ],
     "context": [
@@ -102,24 +40,16 @@
         "type": "static",
         "values": [
           {
-            "label": "Stripe Token",
-            "key": "__token",
-            "type": "string"
+            "label": "Embed Status",
+            "key": "status",
+            "type": "string",
+            "description": "Current status of the embed operation (initializing, loading, embedded, error)"
           },
           {
             "label": "Error",
-            "key": "__error",
-            "type": "string"
-          },
-          {
-            "label": "Stripe",
-            "key": "__stripe",
-            "type": "object"
-          },
-          {
-            "label": "Elements",
-            "key": "__elements",
-            "type": "object"
+            "key": "error",
+            "type": "string",
+            "description": "Error message if embedding failed"
           }
         ]
       }

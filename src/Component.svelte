@@ -1,122 +1,161 @@
 <script>
   import { getContext } from "svelte"
-  import { onMount } from 'svelte'
-  import { loadStripe } from '@stripe/stripe-js'
-  import { Elements, CardNumber, CardCvc, CardExpiry } from 'svelte-stripe'
+  import { onMount, onDestroy } from 'svelte'
+  import { createEventDispatcher } from 'svelte'
 
-
-  export let PUBLIC_STRIPE_KEY
-  export let theme
-  export let labels
-
-  export let rules
-  export let elementOptions
-  export let elementsOptions
-  export let variables
-  export let onSubmit
-
+  const dispatch = createEventDispatcher()
   const { styleable, Provider } = getContext("sdk")
   const component = getContext("component")
-  let stripe = null
-  let elements
-  let element
-  let name
+
+  export let content
+  export let onMountEvent
+  export let onEmbedded
+
+  let status = 'initializing'
+  let error = null
+  let addedElements = []
+
+  // Function to check if content is valid for head tag
+  function isValidHeadContent(content) {
+    // Check if content is already wrapped in script tags
+    if (content.trim().startsWith("<script") && content.trim().endsWith("</script\>")) {
+      return true
+    }
+    
+    // Check if content contains only valid head elements
+    const validHeadElements = ['script', 'link', 'meta', 'title', 'base', 'style']
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(content, 'text/html')
+    const elements = doc.head.children
+    
+    // If there are no elements, content might be inline script
+    if (elements.length === 0) {
+      return true
+    }
+
+    // Check if all elements are valid head elements
+    return Array.from(elements).every(el => validHeadElements.includes(el.tagName.toLowerCase()))
+  }
+
+  // Function to wrap content in script tags if needed
+  function wrapInScript(content) {
+    if (content.trim().startsWith('<script') && content.trim().endsWith('</script>')) {
+      return content
+    }
+    return `<script>${content}</script>`
+  }
+
+  // Function to safely add element to head
+  async function addElementToHead(element) {
+    return new Promise((resolve, reject) => {
+      if (element.tagName === 'SCRIPT') {
+        // For scripts, create a new script element and copy attributes
+        const newScript = document.createElement('script')
+        Array.from(element.attributes).forEach(attr => {
+          newScript.setAttribute(attr.name, attr.value)
+        })
+        
+        // Handle script loading
+        if (element.src) {
+          newScript.onload = () => {
+            addedElements.push(newScript)
+            resolve()
+          }
+          newScript.onerror = (e) => {
+            reject(new Error(`Failed to load script: ${element.src}`))
+          }
+        } else {
+          newScript.textContent = element.textContent
+          addedElements.push(newScript)
+          resolve()
+        }
+        
+        document.head.appendChild(newScript)
+      } else {
+        // For other elements, clone and append
+        const newElement = element.cloneNode(true)
+        addedElements.push(newElement)
+        document.head.appendChild(newElement)
+        resolve()
+      }
+    })
+  }
 
   onMount(async () => {
-    stripe = await loadStripe(PUBLIC_STRIPE_KEY)
+    try {
+      status = 'loading'
+      // Trigger onMount event
+      onMountEvent?.()
+      dispatch('mount')
+
+      // Validate and prepare content
+      if (!content) {
+        throw new Error('No content provided')
+      }
+
+      // Check if content is valid for head
+      if (!isValidHeadContent(content)) {
+        throw new Error("Invalid content for head tag. Only script, link, meta, title, base, and style elements are allowed.")
+      }
+
+      // Wrap in script tags if needed
+      const preparedContent = wrapInScript(content)
+
+      // Create a temporary div to parse the content
+      const tempDiv = document.createElement('div')
+      tempDiv.innerHTML = preparedContent
+
+      // Move all elements to head
+      const elements = Array.from(tempDiv.children)
+      for (const element of elements) {
+        await addElementToHead(element)
+      }
+
+      status = 'embedded'
+      onEmbedded?.()
+      dispatch('embedded')
+    } catch (e) {
+      status = 'error'
+      error = e.message
+      console.error('Error embedding content:', e)
+      dispatch('error', { error: e.message })
+    }
   })
 
-  function tryParse(value) {
-    try {
-      return JSON.parse(value)
-    } catch (e) {
-      console.error(e)
-      return {}
-    }
-  }
-
-  $: rules = tryParse(rules)
-  $: elementOptions = tryParse(elementOptions)
-  $: elementsOptions = tryParse(elementsOptions)
-  $: variables = tryParse(variables)
-
-  $: error = ''
-  $: dataContext =  {
-    __stripe: stripe,
-    __elements: elements,
-    __token: "",
-    processing: false,
-    __error: error
-  }
-
-  async function submit() {
-    try {
-      dataContext.processing = true
-      const {token, error} = await stripe.createToken(element, { name });
-      dataContext.processing = false
-      if (token) {
-        dataContext.__token = token
-        onSubmit?.({token})
-      } else throw error
-    } catch (e) {
-      dataContext.processing = false
-      console.error(e);
-      error = e?.message ?? e
-    }
-  }
+  // Cleanup on component destruction
+  onDestroy(() => {
+    // Remove all added elements from head
+    addedElements.forEach(element => {
+      if (element.parentNode === document.head) {
+        document.head.removeChild(element)
+      }
+    })
+  })
 </script>
 
-
 <div use:styleable={$component.styles}>
-  {#if error}
-    <p class="error">{error} Please try again.</p>
-  {/if}
-  <Provider data={dataContext}>
-    <Elements
-      mode="setup"
-      currency="usd"
-      {...elementsOptions}
-      {stripe}
-      {theme}
-      {labels}
-      {variables}
-      {rules}
-      bind:elements
-    >
-      <CardNumber bind:element={element} classes={{ base: 'stripe-elements-input' }} {...elementOptions}/>
-
-      <div class="row">
-        <CardExpiry classes={{ base: 'stripe-elements-input' }} {...elementOptions}/>
-        <CardCvc classes={{ base: 'stripe-elements-input' }} {...elementOptions}/>
-      </div>
-      <div on:click|preventDefault={submit} on:keyup={submit}>
-        <slot />
-      </div>
-    </Elements>
+  <Provider data={{ status, error }}>
+    <div class="head-embed-status">
+      {#if status === 'initializing'}
+        Initializing head embed...
+      {:else if status === 'loading'}
+        Loading and embedding content...
+      {:else if status === 'embedded'}
+        Content successfully embedded in head
+      {:else if status === 'error'}
+        Error: {error}
+      {/if}
+    </div>
   </Provider>
 </div>
 
 <style>
-  .error {
-    color: tomato;
-    margin: 2rem 0 0;
-  }
-
-  .row {
-    display: flex;
-    flex-direction: row;
-    gap: 5px;
-  }
-
-  :global(.stripe-elements-input) {
-    border: solid 1px #cacaca;
-    padding: 1em;
-    border-radius: 5px;
-    background: white;
-    margin-bottom: 1.5em;
-  }
-
-  .row :global(.stripe-elements-input) {
-    width: 30%;
+  .head-embed-status {
+    padding: 1rem;
+    border-radius: 4px;
+    background: #f5f5f5;
+    font-size: 0.9em;
+    color: #666;
+    margin: 0.5rem 0;
   }
 </style>
