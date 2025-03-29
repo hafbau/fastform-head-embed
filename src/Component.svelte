@@ -23,6 +23,7 @@
   // Function to check if content is valid for head tag
   function isValidHeadContent(content) {
     console.log('4. Validating content:', content)
+    return true
     
     // For simple script content, just check if it's valid JavaScript
     if (!content.includes('<')) {
@@ -107,7 +108,7 @@
   console.log('21. Script setup complete')
 </script>
 
-<svelte:head>
+<!-- <svelte:head>
   {#if headContent}
     {#if isScriptContent}
       <script>
@@ -118,7 +119,7 @@
       {@html headContent}
     {/if}
   {/if}
-</svelte:head>
+</svelte:head> -->
 
 <div use:styleable={$component.styles}>
   <Provider data={{ status, error }}>
@@ -129,6 +130,7 @@
         Loading and embedding content...
       {:else if status === 'embedded'}
         Content successfully embedded in head
+        <div>{headContent}</div>
       {:else if status === 'error'}
         Error: {error}
       {/if}
