@@ -1,7 +1,5 @@
 <script>
-  import { getContext } from "svelte"
-  import { onMount, onDestroy } from 'svelte'
-  import { createEventDispatcher } from 'svelte'
+  import { getContext, onMount, createEventDispatcher } from "svelte"
 
   console.log('1. Component initialization start')
   
