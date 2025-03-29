@@ -4,7 +4,7 @@
   console.log('1. Component initialization start')
   
   const dispatch = createEventDispatcher()
-  const { styleable, Provider } = getContext("sdk")
+  const { styleable } = getContext("sdk")
   const component = getContext("component")
 
   console.log('2. Context and props setup complete')
@@ -122,20 +122,18 @@
 </svelte:head> -->
 
 <div use:styleable={$component.styles}>
-  <Provider data={{ status, error }}>
-    <div class="head-embed-status">
-      {#if status === 'initializing'}
-        Initializing head embed...
-      {:else if status === 'loading'}
-        Loading and embedding content...
-      {:else if status === 'embedded'}
-        Content successfully embedded in head
-        <div>{headContent}</div>
-      {:else if status === 'error'}
-        Error: {error}
-      {/if}
-    </div>
-  </Provider>
+  <div class="head-embed-status">
+    {#if status === 'initializing'}
+      Initializing head embed...
+    {:else if status === 'loading'}
+      Loading and embedding content...
+    {:else if status === 'embedded'}
+      Content successfully embedded in head
+      <div>{headContent}</div>
+    {:else if status === 'error'}
+      Error: {error}
+    {/if}
+  </div>
 </div>
 
 <style>
