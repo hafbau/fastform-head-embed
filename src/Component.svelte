@@ -16,6 +16,7 @@
   let status = 'initializing'
   let error = null
   let headContent = ''
+  let isScriptContent = false
 
   console.log('3. State variables initialized')
 
@@ -28,6 +29,7 @@
       try {
         console.log('5. Attempting to parse as JavaScript')
         new Function(content)
+        isScriptContent = true
         return true
       } catch (e) {
         console.log('6. JavaScript parsing failed:', e)
@@ -47,11 +49,12 @@
       console.error("Error parsing content:", e)
       return false
     }
-    const elements = doc.head.children
+    const elements = []//doc.head.children
     
     // If there are no elements, content might be inline script
     if (elements.length === 0) {
       console.log('10. No elements found, treating as inline script')
+      isScriptContent = true
       return true
     }
 
@@ -60,7 +63,7 @@
     return Array.from(elements).every(el => validHeadElements.includes(el.tagName.toLowerCase()))
   }
 
-  onMount(async () => {
+  onMount(() => {
     console.log('12. Component mounted')
     try {
       status = 'loading'
@@ -106,7 +109,7 @@
 
 <svelte:head>
   {#if headContent}
-    {#if !headContent.includes('<')}
+    {#if isScriptContent}
       <script>
         console.log('22. Executing script content')
         {headContent}
